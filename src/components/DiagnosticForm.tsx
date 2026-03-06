@@ -96,7 +96,7 @@ const questions: Question[] = [
     id: "gestao_rendimento",
     category: "Controle de Proteínas",
     title: "Gestão de Rendimento",
-    description: "Existe o processo de porcionamento das carnes com medição do rendimento (peso bruto vs. peso limpo), comparando o resultado com uma meta de aproveitamento pré-definida?",
+    description: "Existe o processo de porcionamento das proteínas com medição do rendimento (peso bruto vs. peso limpo), comparando o resultado com uma meta de aproveitamento pré-definida?",
     options: [
       { value: "sim_com_metas", label: "Sim, com metas definidas", description: "Medimos e comparamos com metas de aproveitamento" },
       { value: "sem_metas", label: "Fazemos, mas sem metas", description: "Porcionamos, mas sem referência de rendimento" },
