@@ -535,7 +535,7 @@ export default function DiagnosticForm() {
       {/* Footer */}
       <footer className="text-center pb-10 px-6">
         <p className="text-xs text-muted-foreground">
-          © {new Date().getFullYear()} Consultoria Forneto · Diagnóstico de Gestão de Compras e Estoques
+          © 2026 Flux Soluções · Diagnóstico de Gestão de Compras e Estoques
         </p>
       </footer>
     </div>
