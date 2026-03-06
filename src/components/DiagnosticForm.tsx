@@ -367,19 +367,13 @@ export default function DiagnosticForm() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <p
-              className="text-xs font-semibold tracking-[0.2em] uppercase mb-2"
-              style={{ color: "hsl(38 90% 72%)" }}
-            >
+            <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-2 text-white">
               Consultoria Especializada
             </p>
             <h1 className="font-display text-3xl md:text-4xl font-bold text-white mb-1">
               Restaurante Forneto
             </h1>
-            <p
-              className="text-sm md:text-base font-light"
-              style={{ color: "hsl(38 60% 82%)" }}
-            >
+            <p className="text-sm md:text-base font-light text-white">
               Diagnóstico de Gestão de Compras e Estoques
             </p>
           </motion.div>
