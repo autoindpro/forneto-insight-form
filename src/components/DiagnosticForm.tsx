@@ -107,11 +107,11 @@ const questions: Question[] = [
     id: "estrategia_compras",
     category: "Estratégia de Compras",
     title: "Estratégia de Compras",
-    description: "As compras são realizadas com base em um ponto de reposição (estoque ideal) definido tecnicamente ou são feitas de maneira empírica/no 'olhômetro'?",
+    description: "As compras são realizadas com base em um ponto de reposição (estoque ideal) definido tecnicamente ou são feitas de maneira empirica/no 'olhometro'?",
     options: [
       { value: "ponto_reposicao", label: "Ponto de reposição técnico", description: "Compras baseadas em estoque mínimo calculado" },
       { value: "misto", label: "Método misto", description: "Combinação de critérios técnicos e empíricos" },
-      { value: "olhometro", label: "Empírico / 'olhômetro'", description: "Compras baseadas na percepção do momento" },
+      { value: "olhometro", label: "Empirico / 'olhometro'", description: "Compras baseadas na percepção do momento" },
     ],
   },
   {
