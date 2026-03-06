@@ -522,7 +522,7 @@ export default function DiagnosticForm() {
                     setRespondentName("");
                     setRespondentRole("");
                   }}
-                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                  className="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-xl font-semibold text-sm gradient-accent text-white shadow-button hover:opacity-90 hover:scale-[1.01] active:scale-[0.99] transition-all duration-200"
                 >
                   Preencher novamente
                 </button>
