@@ -96,7 +96,7 @@ const questions: Question[] = [
     id: "gestao_rendimento",
     category: "Controle de Proteínas",
     title: "Gestão de Rendimento",
-    description: "Existe o processo de porcionamento das carnes com medição do rendimento (peso bruto vs. peso limpo), comparando o resultado com uma meta de aproveitamento pré-definida?",
+    description: "Existe o processo de porcionamento das proteínas com medição do rendimento (peso bruto vs. peso limpo), comparando o resultado com uma meta de aproveitamento pré-definida?",
     options: [
       { value: "sim_com_metas", label: "Sim, com metas definidas", description: "Medimos e comparamos com metas de aproveitamento" },
       { value: "sem_metas", label: "Fazemos, mas sem metas", description: "Porcionamos, mas sem referência de rendimento" },
@@ -107,11 +107,11 @@ const questions: Question[] = [
     id: "estrategia_compras",
     category: "Estratégia de Compras",
     title: "Estratégia de Compras",
-    description: "As compras são realizadas com base em um ponto de reposição (estoque ideal) definido tecnicamente ou são feitas de maneira empírica/no 'olhômetro'?",
+    description: "As compras são realizadas com base em um ponto de reposição (estoque ideal) definido tecnicamente ou são feitas de maneira empirica/no 'olhometro'?",
     options: [
       { value: "ponto_reposicao", label: "Ponto de reposição técnico", description: "Compras baseadas em estoque mínimo calculado" },
       { value: "misto", label: "Método misto", description: "Combinação de critérios técnicos e empíricos" },
-      { value: "olhometro", label: "Empírico / 'olhômetro'", description: "Compras baseadas na percepção do momento" },
+      { value: "olhometro", label: "Empirico / 'olhometro'", description: "Compras baseadas na percepção do momento" },
     ],
   },
   {
@@ -522,7 +522,7 @@ export default function DiagnosticForm() {
                     setRespondentName("");
                     setRespondentRole("");
                   }}
-                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                  className="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-xl font-semibold text-sm gradient-accent text-white shadow-button hover:opacity-90 hover:scale-[1.01] active:scale-[0.99] transition-all duration-200"
                 >
                   Preencher novamente
                 </button>
