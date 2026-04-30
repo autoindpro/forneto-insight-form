@@ -9,7 +9,13 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const WEBHOOK_URL = "https://n8n.autoindpro.com.br/webhook/forneto";
+const WEBHOOK_URL =
+  import.meta.env.VITE_WEBHOOK_URL ??
+  "https://n8n.autoindpro.com.br/webhook/prestek";
+const WEBHOOK_WAIT_MS = Math.max(
+  0,
+  Number(import.meta.env.VITE_WEBHOOK_WAIT_MS ?? 5000),
+);
 
 interface Question {
   id: string;
@@ -21,247 +27,242 @@ interface Question {
 
 const questions: Question[] = [
   {
-    id: "registro_movimentacao",
-    category: "Controle Operacional",
-    title: "Registro de Movimentação",
+    id: "catalogo_itens",
+    category: "Cadastro & Sistemas",
+    title: "Cadastro de itens e serialização",
     description:
-      "Como é realizado atualmente o registro de entradas (compras) e saídas (vendas/perdas)?",
+      "Como é feito o cadastro e o controle de itens como ONTs/roteadores (nº de série), cabos, conectores e materiais de instalação?",
     options: [
       {
-        value: "software",
-        label: "Via software de gestão",
-        description: "Sistema informatizado com registro digital",
+        value: "sistema_serial",
+        label: "Sistema com serial/SKU",
+        description: "Cadastro por SKU e controle por número de série quando aplicável",
       },
       {
-        value: "manual",
-        label: "Manual em papel",
-        description: "Planilhas ou cadernos físicos",
+        value: "misto",
+        label: "Misto",
+        description: "Alguns itens controlados, outros ficam genéricos",
       },
       {
-        value: "nenhum",
-        label: "Sem registro formal",
-        description: "Não existe controle sistemático",
+        value: "nao_padronizado",
+        label: "Não padronizado",
+        description: "Controle informal/planilhas, sem rastreabilidade consistente",
       },
     ],
   },
   {
-    id: "rigor_recebimento",
-    category: "Controle de Qualidade",
-    title: "Rigor no Recebimento",
+    id: "recebimento",
+    category: "Recebimento",
+    title: "Conferência no recebimento",
     description:
-      "No ato da entrega, é utilizada uma balança para conferir se o peso físico das proteínas e insumos caros coincide exatamente com o faturado na nota fiscal?",
+      "No recebimento de compras, como é feita a conferência de quantidade, modelo e número de série (quando existir)?",
     options: [
       {
-        value: "sempre",
-        label: "Sim, sempre",
-        description: "Conferência rigorosa em 100% das entregas",
+        value: "rigor_total",
+        label: "Rigorosa em 100%",
+        description: "Conferimos quantidade + itens críticos + seriais",
       },
       {
-        value: "as_vezes",
-        label: "Às vezes",
-        description: "Conferência parcial ou irregular",
+        value: "parcial",
+        label: "Parcial",
+        description: "Conferência por amostragem ou só quantidade",
       },
       {
-        value: "nao",
-        label: "Não fazemos",
-        description: "Sem conferência de peso no recebimento",
+        value: "minima",
+        label: "Mínima ou inexistente",
+        description: "Quase não conferimos; problemas aparecem depois",
       },
     ],
   },
   {
-    id: "segregacao_estoques",
-    category: "Gestão de Estoque",
-    title: "Segregação de Estoques",
+    id: "segregacao_estoque",
+    category: "Armazenagem",
+    title: "Segregação de estoques",
     description:
-      "O estoque central (bruto/trancado) é separado fisicamente do estoque da cozinha (operacional), ou toda a mercadoria fica disponível para livre acesso da equipe?",
+      "O estoque central (almoxarifado) é separado do estoque operacional (técnicos/veículos/POP), com controle de acesso e responsabilidade?",
     options: [
       {
-        value: "totalmente_separado",
-        label: "Totalmente separado",
-        description: "Estoque central trancado, com acesso controlado",
+        value: "separado_controlado",
+        label: "Totalmente separado e controlado",
+        description: "Retiradas por requisição/OS e responsável definido",
       },
       {
-        value: "parcialmente",
-        label: "Parcialmente separado",
-        description: "Alguma divisão, mas sem controle rígido",
+        value: "parcial",
+        label: "Parcialmente",
+        description: "Existe separação, mas com brechas de controle",
       },
       {
         value: "acesso_livre",
         label: "Acesso livre",
-        description: "Toda mercadoria disponível para a equipe",
+        description: "Materiais ficam disponíveis sem rastreio consistente",
       },
     ],
   },
   {
-    id: "priorizacao_8020",
+    id: "priorizacao_abc",
     category: "Estratégia",
-    title: "Priorização — Regra 80/20",
+    title: "Priorização (Curva ABC / 80-20)",
     description:
-      "Você identifica quais são os 20% de itens que representam 80% do valor do seu estoque (Itens de Classe A) e dedica a eles um controle mais rigoroso e frequente?",
+      "Vocês identificam e controlam com mais rigor os itens que mais impactam custo/risco (ex.: ONT, roteador, OLT/placas, bobinas de fibra, conectores)?",
     options: [
       {
-        value: "sim_formalmente",
+        value: "sim_formal",
         label: "Sim, formalmente",
-        description: "Classificação ABC documentada e aplicada",
+        description: "Curva ABC definida e rotina de controle para itens A",
       },
       {
-        value: "parcialmente",
+        value: "parcial",
         label: "Parcialmente",
-        description: "Reconheço os itens, mas sem processo formal",
+        description: "Sabemos os itens críticos, mas sem processo formal",
       },
       {
         value: "nao",
-        label: "Não faço isso",
-        description: "Todos os itens recebem o mesmo nível de controle",
+        label: "Não",
+        description: "Todos os itens recebem o mesmo nível de atenção",
       },
     ],
   },
   {
-    id: "entendimento_cmv",
-    category: "Indicadores Financeiros",
-    title: "Entendimento do CMV",
+    id: "planejamento_compras",
+    category: "Compras",
+    title: "Planejamento e ponto de reposição",
     description:
-      "Você sabe calcular o CMV (Custo de Mercadoria Vendida) da casa e compreende que ele é um indicador de consumo — o que foi usado/sumiu — e não apenas um indicador de compras?",
+      "As compras de materiais/equipamentos são feitas com base em ponto de reposição e previsão de demanda (instalações, churn, upgrades) ou no \"feeling\"?",
     options: [
       {
-        value: "sim_completo",
-        label: "Sim, completamente",
-        description: "Calculo e interpreto corretamente o CMV",
+        value: "tecnico",
+        label: "Técnico (com reposição)",
+        description: "Estoque mínimo/lead time e previsão por OS/demanda",
       },
       {
-        value: "parcialmente",
-        label: "Parcialmente",
-        description: "Conheço o conceito, mas tenho dúvidas na prática",
+        value: "misto",
+        label: "Misto",
+        description: "Parte calculado, parte empírico",
       },
       {
-        value: "nao_sei",
-        label: "Não sei calcular",
-        description: "Preciso aprender a calcular e interpretar o CMV",
+        value: "empirico",
+        label: "Empírico",
+        description: "Compra quando falta ou quando alguém percebe",
       },
     ],
   },
   {
-    id: "precisao_acuracia",
+    id: "inventario",
     category: "Inventário",
-    title: "Precisão e Acurácia",
+    title: "Frequência e acuracidade",
     description:
-      "Com que frequência é realizado o inventário físico para confrontar o que está na prateleira com o saldo teórico do sistema, visando medir a precisão do estoque?",
+      "Com que frequência é realizado inventário/ciclo de contagem para confrontar saldo físico x sistema e medir acuracidade do estoque?",
     options: [
       {
-        value: "diariamente",
-        label: "Diariamente",
-        description: "Contagem física diária dos itens críticos",
+        value: "ciclico",
+        label: "Cíclico (semanal/quinzenal)",
+        description: "Itens críticos contados com alta frequência",
       },
       {
-        value: "semanalmente",
-        label: "Semanalmente",
-        description: "Inventário semanal completo ou parcial",
-      },
-      {
-        value: "mensalmente",
-        label: "Mensalmente",
-        description: "Apenas no fechamento mensal",
+        value: "mensal",
+        label: "Mensal",
+        description: "Rotina mensal de inventário total ou parcial",
       },
       {
         value: "raramente",
-        label: "Raramente ou nunca",
-        description: "Sem rotina de inventário definida",
+        label: "Raramente",
+        description: "Sem rotina definida de contagem e reconciliação",
       },
     ],
   },
   {
-    id: "fichas_tecnicas",
-    category: "Cardápio & Sistemas",
-    title: "Fichas Técnicas e Baixas",
+    id: "baixa_por_os",
+    category: "Operação",
+    title: "Baixa por OS (consumo teórico)",
     description:
-      "Todos os itens do cardápio (pizzas e pratos) possuem fichas técnicas cadastradas que dão baixa automática nas matérias-primas no momento exato da venda?",
+      "Os materiais/equipamentos usados em instalação/manutenção têm baixa no sistema por Ordem de Serviço (kit por tipo de serviço), para formar um consumo teórico?",
     options: [
       {
-        value: "sim_todos",
-        label: "Sim, todos os itens",
-        description: "100% do cardápio com fichas técnicas ativas",
+        value: "sim_padronizado",
+        label: "Sim, padronizado",
+        description: "Kits e baixas por OS com rastreio consistente",
       },
       {
-        value: "parcialmente",
+        value: "parcial",
         label: "Parcialmente",
-        description: "Parte do cardápio com fichas técnicas",
+        description: "Alguns serviços têm kit/baixa; outros ficam soltos",
+      },
+      {
+        value: "nao",
+        label: "Não",
+        description: "Materiais saem do estoque sem vínculo claro com a OS",
+      },
+    ],
+  },
+  {
+    id: "devolucao_comodato",
+    category: "Reverso",
+    title: "Devolução e comodato (CPE)",
+    description:
+      "Quando há cancelamento/troca de equipamento, existe processo para recolher, testar e dar entrada no estoque (ou baixar como perda)?",
+    options: [
+      {
+        value: "processo_completo",
+        label: "Sim, completo",
+        description: "Coleta + triagem + entrada + rastreio por serial",
+      },
+      {
+        value: "irregular",
+        label: "Irregular",
+        description: "Às vezes recolhe; entrada/triagem não é consistente",
       },
       {
         value: "nao",
         label: "Não temos",
-        description: "Sem fichas técnicas cadastradas",
+        description: "Equipamentos se perdem ou não retornam ao estoque",
       },
     ],
   },
   {
-    id: "gestao_rendimento",
-    category: "Controle de Proteínas",
-    title: "Gestão de Rendimento",
+    id: "fornecedores_leadtime",
+    category: "Fornecedores",
+    title: "Lead time e contratos",
     description:
-      "Existe o processo de porcionamento das proteínas com medição do rendimento (peso bruto vs. peso limpo), comparando o resultado com uma meta de aproveitamento pré-definida?",
+      "Vocês controlam lead time por fornecedor e têm acordos/contratos para itens críticos (para evitar ruptura e compras emergenciais)?",
     options: [
       {
-        value: "sim_com_metas",
-        label: "Sim, com metas definidas",
-        description: "Medimos e comparamos com metas de aproveitamento",
+        value: "sim",
+        label: "Sim",
+        description: "Lead time monitorado e compras planejadas",
       },
       {
-        value: "sem_metas",
-        label: "Fazemos, mas sem metas",
-        description: "Porcionamos, mas sem referência de rendimento",
+        value: "parcial",
+        label: "Parcialmente",
+        description: "Alguns fornecedores controlados, outros no improviso",
       },
       {
-        value: "nao_fazemos",
-        label: "Não fazemos",
-        description: "Sem processo de controle de rendimento",
-      },
-    ],
-  },
-  {
-    id: "estrategia_compras",
-    category: "Estratégia de Compras",
-    title: "Estratégia de Compras",
-    description:
-      "As compras são realizadas com base em um ponto de reposição (estoque ideal) definido tecnicamente ou são feitas de maneira empirica/no 'olhometro'?",
-    options: [
-      {
-        value: "ponto_reposicao",
-        label: "Ponto de reposição técnico",
-        description: "Compras baseadas em estoque mínimo calculado",
-      },
-      {
-        value: "misto",
-        label: "Método misto",
-        description: "Combinação de critérios técnicos e empíricos",
-      },
-      {
-        value: "olhometro",
-        label: "Empirico / 'olhometro'",
-        description: "Compras baseadas na percepção do momento",
+        value: "nao",
+        label: "Não",
+        description: "Dependemos de urgência e disponibilidade do momento",
       },
     ],
   },
   {
     id: "monitoramento_gap",
-    category: "Indicadores Avançados",
-    title: "Monitoramento da Lacuna (Gap)",
+    category: "Indicadores",
+    title: "Controle de perdas e desvios (gap)",
     description:
-      "Você monitora a diferença entre o seu CMV Real e o seu CMV Teórico para identificar desperdícios ocultos, desvios ou falhas de processo na cozinha?",
+      "Vocês medem a diferença entre consumo teórico (por OS/kits) e consumo real/baixas para identificar perdas, desvios ou falhas de processo?",
     options: [
       {
-        value: "sim_regularmente",
+        value: "sim_regular",
         label: "Sim, regularmente",
-        description: "Análise mensal ou mais frequente do gap de CMV",
+        description: "Acompanhamento mensal ou mais frequente",
       },
       {
         value: "as_vezes",
         label: "Às vezes",
-        description: "Análise esporádica sem periodicidade definida",
+        description: "Análise esporádica sem rotina definida",
       },
       {
-        value: "nao_monitoro",
-        label: "Não monitoro",
-        description: "Desconheço ou não acompanho esse indicador",
+        value: "nao",
+        label: "Não",
+        description: "Não existe indicador/rotina de análise",
       },
     ],
   },
@@ -276,6 +277,7 @@ export default function DiagnosticForm() {
   const [direction, setDirection] = useState(1);
   const [status, setStatus] = useState<FormStatus>("idle");
   const [errorMsg, setErrorMsg] = useState("");
+  const [deliveryUnconfirmed, setDeliveryUnconfirmed] = useState(false);
   const [respondentName, setRespondentName] = useState("");
   const [respondentRole, setRespondentRole] = useState("");
 
@@ -306,11 +308,16 @@ export default function DiagnosticForm() {
   }
 
   async function handleSubmit() {
+    if (status === "submitting") return;
     setStatus("submitting");
     setErrorMsg("");
+    setDeliveryUnconfirmed(false);
+    setDirection(1);
+    setStep(questions.length + 1);
 
     const payload = {
-      restaurante: "Forneto",
+      empresa: "Prestek",
+      restaurante: "Prestek",
       respondente: respondentName,
       cargo: respondentRole,
       data_submissao: new Date().toISOString(),
@@ -326,21 +333,64 @@ export default function DiagnosticForm() {
     };
 
     try {
-      const res = await fetch(WEBHOOK_URL, {
+      const body = JSON.stringify(payload);
+      const timeoutSentinel = Symbol("timeout");
+      const sendPromise = fetch(WEBHOOK_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body,
+        keepalive: true,
       });
 
+      const raceResult = await Promise.race([
+        sendPromise,
+        new Promise<typeof timeoutSentinel>((resolve) =>
+          window.setTimeout(() => resolve(timeoutSentinel), WEBHOOK_WAIT_MS),
+        ),
+      ]);
+
+      if (raceResult === timeoutSentinel) {
+        // O webhook pode ter recebido o POST, mas o workflow pode demorar (ex.: agente de IA).
+        // Evita marcar como erro só porque a resposta demorou.
+        setDeliveryUnconfirmed(true);
+        setStatus("success");
+
+        void sendPromise
+          .then((res) => {
+            if (res.ok) setDeliveryUnconfirmed(false);
+          })
+          .catch(() => {
+            setDeliveryUnconfirmed(true);
+          });
+
+        return;
+      }
+
+      const res = raceResult;
       if (!res.ok) throw new Error(`Erro ${res.status}`);
       setStatus("success");
-      setDirection(1);
-      setStep(questions.length + 1);
     } catch (err) {
-      setStatus("error");
-      setErrorMsg(
-        err instanceof Error ? err.message : "Erro desconhecido ao enviar.",
-      );
+      // Fallback para evitar preflight/CORS bloqueando o POST (comum em webhooks).
+      // No modo "no-cors" não dá para validar o status da resposta.
+      try {
+        await fetch(WEBHOOK_URL, {
+          method: "POST",
+          mode: "no-cors",
+          body: JSON.stringify(payload),
+          keepalive: true,
+        });
+        setDeliveryUnconfirmed(true);
+        setStatus("success");
+      } catch (fallbackErr) {
+        setStatus("error");
+        setErrorMsg(
+          fallbackErr instanceof Error
+            ? fallbackErr.message
+            : err instanceof Error
+              ? err.message
+              : "Erro desconhecido ao enviar.",
+        );
+      }
     }
   }
 
@@ -368,10 +418,10 @@ export default function DiagnosticForm() {
             transition={{ duration: 0.6 }}
           >
             <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-2 text-white">
-              Consultoria Especializada
+              Flux Soluções - Consultoria Empresarial
             </p>
             <h1 className="font-display text-3xl md:text-4xl font-bold text-white mb-1">
-              Restaurante Forneto
+              Prestek
             </h1>
             <p className="text-sm md:text-base font-light text-white">
               Diagnóstico de Gestão de Compras e Estoques
@@ -431,24 +481,22 @@ export default function DiagnosticForm() {
                     Bem-vindo ao Diagnóstico
                   </span>
                   <h2 className="font-display text-2xl font-bold text-foreground mb-3">
-                    Avaliação de Maturidade em Gestão de Estoque
+                    Avaliação de Maturidade em Compras e Estoques
                   </h2>
                   <p className="text-muted-foreground leading-relaxed text-sm">
-                    Este questionário visa{" "}
+                    Este questionário ajuda a{" "}
                     <strong className="text-foreground">
-                      identificar oportunidades de melhoria na lucratividade
+                      identificar oportunidades de melhoria e redução de perdas
                     </strong>{" "}
-                    e medir a evolução do aprendizado técnico da equipe gestora
-                    do Restaurante Forneto.
+                    na cadeia de suprimentos e no controle de materiais/equipamentos.
                   </p>
                   <p className="text-muted-foreground leading-relaxed text-sm mt-3">
                     São{" "}
                     <strong className="text-foreground">
-                      10 perguntas objetivas
+                      {questions.length} perguntas objetivas
                     </strong>{" "}
-                    sobre processos de compras, controle de estoque e
-                    indicadores financeiros. Responda com sinceridade para obter
-                    um diagnóstico preciso.
+                    sobre compras, recebimento, inventário, rastreabilidade e indicadores. Responda
+                    com sinceridade para obter um diagnóstico preciso.
                   </p>
                 </div>
 
@@ -479,7 +527,7 @@ export default function DiagnosticForm() {
                       type="text"
                       value={respondentRole}
                       onChange={(e) => setRespondentRole(e.target.value)}
-                      placeholder="Ex: Gerente de Operações"
+                      placeholder="Ex: Coordenador de Operações"
                       className="w-full px-4 py-3 rounded-xl border border-input bg-background text-foreground placeholder:text-muted-foreground text-sm focus:outline-none focus:ring-2 transition-shadow"
                       style={
                         {
@@ -687,21 +735,73 @@ export default function DiagnosticForm() {
                   className="inline-flex items-center justify-center w-20 h-20 rounded-full mb-6"
                   style={{ background: "hsl(var(--primary) / 0.1)" }}
                 >
-                  <CheckCircle
-                    className="w-10 h-10"
-                    style={{ color: "hsl(var(--primary))" }}
-                  />
+                  {status === "submitting" ? (
+                    <span
+                      className="w-10 h-10 border-4 border-border rounded-full animate-spin"
+                      style={{ borderTopColor: "hsl(var(--primary))" }}
+                    />
+                  ) : status === "error" ? (
+                    <AlertCircle
+                      className="w-10 h-10"
+                      style={{ color: "hsl(var(--destructive))" }}
+                    />
+                  ) : (
+                    <CheckCircle
+                      className="w-10 h-10"
+                      style={{ color: "hsl(var(--primary))" }}
+                    />
+                  )}
                 </motion.div>
 
                 <h2 className="font-display text-2xl font-bold text-foreground mb-3">
-                  Diagnóstico Enviado!
+                  {status === "submitting"
+                    ? "Enviando diagnóstico..."
+                    : status === "error"
+                      ? "Falha no envio"
+                      : "Diagnóstico Enviado!"}
                 </h2>
-                <p className="text-muted-foreground text-sm leading-relaxed mb-6 max-w-sm mx-auto">
-                  Obrigado,{" "}
-                  <strong className="text-foreground">{respondentName}</strong>!
-                  Suas respostas foram registradas com sucesso. Nossa equipe irá
-                  analisar o diagnóstico e entrar em contato em breve.
-                </p>
+
+                {status === "success" && (
+                  <p className="text-muted-foreground text-sm leading-relaxed mb-6 max-w-sm mx-auto">
+                    Obrigado,{" "}
+                    <strong className="text-foreground">
+                      {respondentName}
+                    </strong>
+                    ! Suas respostas foram registradas com sucesso.
+                  </p>
+                )}
+
+                {status === "success" && deliveryUnconfirmed && (
+                  <p className="text-muted-foreground text-xs leading-relaxed mb-6 max-w-sm mx-auto">
+                    Observação: o navegador não conseguiu confirmar a resposta do
+                    servidor (CORS), mas o envio foi disparado para o webhook.
+                  </p>
+                )}
+
+                {status === "submitting" && (
+                  <p className="text-muted-foreground text-sm leading-relaxed mb-6 max-w-sm mx-auto">
+                    Estamos enviando suas respostas. Isso pode levar alguns
+                    segundos.
+                  </p>
+                )}
+
+                {status === "error" && (
+                  <div className="mb-6 max-w-sm mx-auto">
+                    <p className="text-sm text-destructive leading-relaxed">
+                      {errorMsg ||
+                        "Falha ao enviar. Verifique sua conexão e tente novamente."}
+                    </p>
+                    <div className="mt-4 flex items-center justify-center gap-3">
+                      <button
+                        onClick={handleSubmit}
+                        className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm gradient-accent text-white shadow-button hover:opacity-90 active:scale-[0.99] transition-all duration-200"
+                      >
+                        Tentar novamente
+                        <Send className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 <div className="bg-muted/60 rounded-xl p-5 text-left mb-6">
                   <p
@@ -740,7 +840,13 @@ export default function DiagnosticForm() {
                     setRespondentName("");
                     setRespondentRole("");
                   }}
-                  className="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-xl font-semibold text-sm gradient-accent text-white shadow-button hover:opacity-90 hover:scale-[1.01] active:scale-[0.99] transition-all duration-200"
+                  disabled={status === "submitting"}
+                  className={cn(
+                    "inline-flex items-center justify-center gap-2 px-8 py-3 rounded-xl font-semibold text-sm transition-all duration-200",
+                    status === "submitting"
+                      ? "bg-muted text-muted-foreground cursor-not-allowed"
+                      : "gradient-accent text-white shadow-button hover:opacity-90 hover:scale-[1.01] active:scale-[0.99]",
+                  )}
                 >
                   Preencher novamente
                 </button>
